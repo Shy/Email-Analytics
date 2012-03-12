@@ -1,4 +1,4 @@
-# Copyright (c) 2012 by Shyamal Ruparel
+# Copyright (c) 2012 by Shyamal Ruparel - Burst Development
 #
 # GNU General Public Licence (GPL)
 # 
@@ -30,38 +30,34 @@ def downloadMessage(n, fname):
 	resp, lst = svr.fetch(n, '(RFC822)')
 	if resp!='OK':
 		raise Exception("Bad response: %s %s" % (resp, lst))
-	temp = lst[0][1]
-	Email= temp.splitlines(True)		
-	count = 5	
-	cd,cf,ct,cs,ci = [1,1,1,1,1]
+	read = lst[0][1]
+	Email= read.splitlines(True)		
+		
+	count = [1,1,1,1,1]
 
 	for s in range(0,len(Email)):
-		temp = Email[s]
-		if temp[0:5] == 'Date:' :
-			Date = temp [6:len(temp)]
-			count = count - cd; 
-			cd = 0;		
-		elif temp[0:5] == 'From:' :
-			From = temp [6:len(temp)]
-			count = count - cf
-			cf = 0
-		elif temp[0:3] == 'To:' :
-			To = temp [4:len(temp)]
-			count = count - ct
-			ct = 0
-		elif temp[0:8] == 'Subject:' :
-			Subject = temp [9:len(temp)]
-			count = count - cs
-			cs = 0
-		elif temp[0:11] == 'Message-ID:' or temp[0:11] == 'Message-Id:'  :
-			ID = temp [12:len(temp)]
-			count = count - ci
-			ci = 0
-		if count == 0:
+		line = Email[s]
+		
+		if line[0:5] == 'Date:' :
+			Date = line [6:len(line)]
+			count[0]=0;
+		elif line[0:5] == 'From:' :
+			From = line [6:len(line)]
+			count[1] = 0
+		elif line[0:3] == 'To:' :
+			To = line [4:len(line)]
+			count[2] = 0
+		elif line[0:8] == 'Subject:' :
+			Subject = line [9:len(line)]
+			count[3] = 0
+		elif line[0:11] == 'Message-ID:' or line[0:11] == 'Message-Id:'  :
+			ID = line [12:len(line)]
+			count[4] = 0
+		if count == [0,0,0,0,0]:
 			break;
 
 	with open("Data","a") as myfile:
-		myfile.write(To + "\t" + From + "\t" + Date + "\t" + Subject + "\t" + ID + "\n")
+		myfile.write(fname+ "\t" + To + "\t" + From + "\t" + Date + "\t" + Subject + "\t" + ID + "\n")
 
 filere = re.compile(r"(\d+).eml$")
 def UIDFromFilename(fname):
@@ -71,7 +67,8 @@ def UIDFromFilename(fname):
 
 
 svr = imaplib.IMAP4_SSL('imap.gmail.com')
-svr.login(raw_input("Gmail address: "), getpass.getpass("Gmail password: "))
+#svr.login(raw_input("Gmail address: "), getpass.getpass("Gmail password: "))
+svr.login("shyamalruparel1991@gmail.com","tmivuwpieoiokaoq") 
 
 resp, [countstr] = svr.select("[Gmail]/All Mail", True)
 count = int(countstr)
@@ -96,7 +93,7 @@ while ungotten-gotten>1:
 for i in range(ungotten, count+1):
 	uid = getUIDForMessage(i)
 	print "Downloading %d/%d (UID: %s)" % (i, count, uid)
-	downloadMessage(i, uid+'.eml')
+	downloadMessage(i, uid)
 
 
 svr.close()
