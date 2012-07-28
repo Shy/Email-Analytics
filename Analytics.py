@@ -15,7 +15,8 @@
 # Place, Suite 330, Boston, MA  02111-1307  USA
 
 
-import imaplib, os, getpass, re
+import imaplib, os, getpass, re, email
+from email.parser import Parser
 
 uidre = re.compile(r"\d+\s+\(UID (\d+)\)$")
 def getUIDForMessage(n):
@@ -31,33 +32,15 @@ def downloadMessage(n, fname):
 	if resp!='OK':
 		raise Exception("Bad response: %s %s" % (resp, lst))
 	read = lst[0][1]
-	Email= read.splitlines(True)		
-		
-	count = [1,1,1,1,1]
+	headers = Parser().parsestr(read)
 
-	for s in range(0,len(Email)):
-		line = Email[s]
-		
-		if line[0:5] == 'Date:' :
-			Date = line [6:len(line)]
-			count[0]=0;
-		elif line[0:5] == 'From:' :
-			From = line [6:len(line)]
-			count[1] = 0
-		elif line[0:3] == 'To:' :
-			To = line [4:len(line)]
-			count[2] = 0
-		elif line[0:8] == 'Subject:' :
-			Subject = line [9:len(line)]
-			count[3] = 0
-		elif line[0:11] == 'Message-ID:' or line[0:11] == 'Message-Id:'  :
-			ID = line [12:len(line)]
-			count[4] = 0
-		if count == [0,0,0,0,0]:
-			break;
+	print 'To: %s' % headers['to']
+	print 'From: %s' % headers['from']
+	print 'Subject: %s' % headers['subject']
+	print 'Date: %s' % headers['date']
 
 	with open("Data","a") as myfile:
-		myfile.write(fname+ "\t" + To + "\t" + From + "\t" + Date + "\t" + Subject + "\t" + ID + "\n")
+		myfile.write(fname+ "\n" + "\tTo: " +  headers['to'] + "\n" + "\tFrom: " + headers['from'] + "\n" + "\tDate: " + headers['date'] + "\n" + "\tSubject: " +headers['subject'] + "\n")
 
 filere = re.compile(r"(\d+).eml$")
 def UIDFromFilename(fname):
@@ -67,8 +50,15 @@ def UIDFromFilename(fname):
 
 
 svr = imaplib.IMAP4_SSL('imap.gmail.com')
+
 #svr.login(raw_input("Gmail address: "), getpass.getpass("Gmail password: "))
-svr.login("shyamalruparel1991@gmail.com","tmivuwpieoiokaoq") 
+
+Login  = open('pass.txt','r')
+
+Address = Login.readline().rstrip('\n')
+Password = Login.readline().rstrip('\n')
+
+svr.login( Address, Password )
 
 resp, [countstr] = svr.select("[Gmail]/All Mail", True)
 count = int(countstr)
