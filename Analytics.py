@@ -34,13 +34,16 @@ def downloadMessage(n, fname):
 	read = lst[0][1]
 	headers = Parser().parsestr(read)
 
-	print 'To: %s' % headers['to']
-	print 'From: %s' % headers['from']
-	print 'Subject: %s' % headers['subject']
-	print 'Date: %s' % headers['date']
+#	print 'To: %s' % headers['to']
+#	print 'From: %s' % headers['from']
+#	print 'Subject: %s' % headers['subject']
+#	print 'Date: %s' % headers['date']
 
 	with open("Data","a") as myfile:
-		myfile.write(fname+ "\n" + "\tTo: " +  headers['to'] + "\n" + "\tFrom: " + headers['from'] + "\n" + "\tDate: " + headers['date'] + "\n" + "\tSubject: " +headers['subject'] + "\n")
+		try:
+			myfile.write(fname+ "\n" + "\tTo: " +  headers['to'] + "\n" + "\tFrom: " + headers['from'] + "\n" + "\tDate: " + headers['date'] + "\n" + "\tSubject: " +headers['subject'] + "\n")
+		except:
+			print (fname + ' print failed.')
 
 filere = re.compile(r"(\d+).eml$")
 def UIDFromFilename(fname):
@@ -53,7 +56,10 @@ svr = imaplib.IMAP4_SSL('imap.gmail.com')
 
 #svr.login(raw_input("Gmail address: "), getpass.getpass("Gmail password: "))
 
-Login  = open('pass.txt','r')
+try:
+	Login  = open('pass.txt','r')
+except:
+	print "pass.txt file not found."
 
 Address = Login.readline().rstrip('\n')
 Password = Login.readline().rstrip('\n')
