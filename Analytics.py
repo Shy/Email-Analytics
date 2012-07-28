@@ -17,6 +17,7 @@
 
 import imaplib, os, getpass, re, email
 from email.parser import Parser
+_re_word_boundaries = re.compile(r'\b')
 
 uidre = re.compile(r"\d+\s+\(UID (\d+)\)$")
 def getUIDForMessage(n):
@@ -33,19 +34,36 @@ def downloadMessage(n, fname):
 		raise Exception("Bad response: %s %s" % (resp, lst))
 	read = lst[0][1]
 	headers = Parser().parsestr(read)
+	msg = email.message_from_string(read)
 
-#	print 'To: %s' % headers['to']
-#	print 'From: %s' % headers['from']
-#	print 'Subject: %s' % headers['subject']
-#	print 'Date: %s' % headers['date']
+
+
+
 
 	with open("Data","a") as myfile:
 		try:
-			myfile.write(fname+ "\n" + "\tTo: " +  headers['to'] + "\n" + "\tFrom: " + headers['from'] + "\n" + "\tDate: " + headers['date'] + "\n" + "\tSubject: " +headers['subject'] + "\n")
+				myfile.write(fname +  "\n")
+				myfile.write('To: %s' % headers['to'] + "\n")
+				myfile.write('cc: %s' % headers['cc'] + "\n")
+				myfile.write('bcc: %s' % headers['bcc'] + "\n")
+				myfile.write('From: %s' % headers['from'] + "\n")
+				myfile.write('Subject: %s' % headers['subject'] + "\n")
+				myfile.write('Date: %s' % headers['date'] + "\n")
+				myfile.write('Word Count: %s' % num_words(str(msg)) + "\n")
+				myfile.write("\n")		
+			
+#			myfile.write(fname+ "\n" + "\tTo: " +  headers['to'] + "\n" + "\tFrom: " + headers['from'] + "\n" + "\tDate: " + headers['date'] + "\n" + "\tSubject: " +headers['subject'])
+#			myfile.write(fname+ "\n" + "\tcc: " +  headers['cc'] + "\n" + "\tbcc: " + headers['bcc'] + "\n" + "\tword count: " + num_words(str(msg)))
+#
 		except:
 			print (fname + ' print failed.')
 
 filere = re.compile(r"(\d+).eml$")
+
+def num_words(line):
+    return sum(1 for word in _re_word_boundaries.finditer(line)) >> 1
+
+
 def UIDFromFilename(fname):
 	m = filere.match(fname)
 	if m:
