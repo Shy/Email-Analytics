@@ -88,7 +88,7 @@ while ungotten-gotten>1:
 # The download loop
 for i in range(ungotten, count+1):
 	uid = getUIDForMessage(i)
-	print "Downloading %d/%d (UID: %s)" % (i, count, uid)
+	print "Processing %d/%d (UID: %s)" % (i, count, uid)
 	downloadMessage(i, uid)
 
 
