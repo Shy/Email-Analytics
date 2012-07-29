@@ -26,7 +26,13 @@ def getUIDForMessage(n):
 	if not m:
 		raise Exception("Internal error parsing UID response: %s %s.  Please try again" % (resp, lst))
 	return m.group(1)
-	
+
+def is_number(s):
+    try:
+        float(s)
+        return True
+    except ValueError:
+        return False
 
 def downloadMessage(n, fname):
 	resp, lst = svr.fetch(n, '(RFC822)')
@@ -81,14 +87,25 @@ except:
 
 Address = Login.readline().rstrip('\n')
 Password = Login.readline().rstrip('\n')
+Login.close()
 
 svr.login( Address, Password )
 
 resp, [countstr] = svr.select("[Gmail]/All Mail", True)
 count = int(countstr)
 
-lastdownloaded = max(UIDFromFilename(f) for f in os.listdir('.'))
+fileHandle = open ( 'Data', "r")
+lineList = fileHandle.readlines()
+fileHandle.close()
 
+UID = 1
+while True:
+	if is_number(lineList[len(lineList)-UID]) == True:
+		UID = int(lineList[len(lineList)-UID])
+		break
+	UID = UID +1
+
+lastdownloaded = UID
 
 # A simple binary search to see where we left off
 gotten, ungotten = 0, count+1
